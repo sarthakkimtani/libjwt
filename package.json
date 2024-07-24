@@ -1,5 +1,5 @@
 {
-  "name": "libjwt",
+  "name": "@sarthakkimtani/libjwt",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "global.d.ts",

@@ -13,7 +13,7 @@
 Install the library using npm:
 
 ```bash
-npm install libjwt
+npm install @sarthakkimtani/libjwt
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ npm install libjwt
 To use the library, import the necessary functions:
 
 ```javascript
-import { encode_jwt, decode_jwt, validate_jwt } from "libjwt";
+import { encode_jwt, decode_jwt, validate_jwt } from "@sarthakkimtani/libjwt";
 ```
 
 ### Encoding a JWT
