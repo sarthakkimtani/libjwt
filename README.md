@@ -34,7 +34,7 @@ Create a JWT with a secret, payload, and an optional time-to-live (TTL) in secon
 const secret = "your-secret-key";
 const payload = { id: "user123", role: "admin" };
 
-const token = encode_jwt(secret, payload, 3600); // TTL is 1 hour
+const token = await encode_jwt(secret, payload, 3600); // TTL is 1 hour
 console.log("Generated JWT:", token);
 ```
 
@@ -43,7 +43,7 @@ console.log("Generated JWT:", token);
 Decode a JWT to extract its payload. The function returns an object containing the `id`, full `payload`, and `expires_at` date:
 
 ```javascript
-const decoded = decode_jwt(secret, token);
+const decoded = await decode_jwt(secret, token);
 console.log("Decoded JWT:", decoded);
 ```
 
@@ -52,26 +52,26 @@ console.log("Decoded JWT:", decoded);
 Check if a JWT is valid by verifying its signature and expiration. Returns `true` if the token is valid, otherwise `false`:
 
 ```javascript
-const isValid = validate_jwt(secret, token);
+const isValid = await validate_jwt(secret, token);
 console.log("Is the JWT valid?", isValid);
 ```
 
 ## API Reference
 
-### `encode_jwt(secret: string, payload: JWTPayload, ttl?: number): string`
+### `async encode_jwt(secret: string, payload: JWTPayload, ttl?: number): Promise<string>`
 
 - **secret**: The secret key used to sign the JWT.
 - **payload**: The payload to include in the JWT. This can contain any custom claims.
 - **ttl**: Optional. Time-to-live in seconds. Defaults to 900 seconds (15 minutes).
 
-### `decode_jwt(secret: string, jwt: string): DecodedJWT`
+### `async decode_jwt(secret: string, jwt: string): Promise<DecodedJWT>`
 
 - **secret**: The secret key used to sign the JWT.
 - **jwt**: The JWT string to decode.
 
 Returns an object containing the decoded `id`, `payload`, and `expires_at` date.
 
-### `validate_jwt(secret: string, jwt: string): boolean`
+### `async validate_jwt(secret: string, jwt: string): Promise<boolean>`
 
 - **secret**: The secret key used to sign the JWT.
 - **jwt**: The JWT string to validate.
