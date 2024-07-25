@@ -11,7 +11,7 @@ describe("JWT Library", () => {
   });
 
   describe("encode_jwt", () => {
-    it("Encode correct JWT Structure", () => {
+    it("Encode correct JWT Structure", async () => {
       const mockHeader = JSON.stringify({ alg: "HS256", typ: "JWT" });
       const mockPayload = JSON.stringify({
         ...payload,
@@ -22,9 +22,9 @@ describe("JWT Library", () => {
       jest
         .spyOn(cryptoUtils, "base64UrlEncode")
         .mockImplementation((input) => Buffer.from(input).toString("base64"));
-      jest.spyOn(cryptoUtils, "sign").mockImplementation(() => "signature");
+      jest.spyOn(cryptoUtils, "sign").mockResolvedValue("signature");
 
-      const token = encode_jwt(secret, payload, ttl);
+      const token = await encode_jwt(secret, payload, ttl);
 
       const [encodedHeader, encodedPayload, signature] = token.split(".");
       expect(encodedHeader).toBe(Buffer.from(mockHeader).toString("base64"));
@@ -34,7 +34,7 @@ describe("JWT Library", () => {
   });
 
   describe("decode_jwt", () => {
-    it("Decode valid JWT", () => {
+    it("Decode valid JWT", async () => {
       const encodedHeader = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
         "base64"
       );
@@ -50,17 +50,17 @@ describe("JWT Library", () => {
       jest
         .spyOn(cryptoUtils, "base64UrlDecode")
         .mockImplementation((input) => Buffer.from(input, "base64").toString("utf-8"));
-      jest.spyOn(cryptoUtils, "sign").mockImplementation(() => "signature");
+      jest.spyOn(cryptoUtils, "sign").mockResolvedValue("signature");
 
       const jwt = `${encodedHeader}.${encodedPayload}.${signature}`;
 
-      const decoded = decode_jwt(secret, jwt);
+      const decoded = await decode_jwt(secret, jwt);
 
       expect(decoded.payload).toMatchObject(payload);
       expect(decoded.expires_at).toBeInstanceOf(Date);
     });
 
-    it("Error on Invalid JWT Signature", () => {
+    it("Error on Invalid JWT Signature", async () => {
       const encodedHeader = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
         "base64"
       );
@@ -76,16 +76,16 @@ describe("JWT Library", () => {
       jest
         .spyOn(cryptoUtils, "base64UrlDecode")
         .mockImplementation((input) => Buffer.from(input, "base64").toString("utf-8"));
-      jest.spyOn(cryptoUtils, "sign").mockImplementation(() => "signature");
+      jest.spyOn(cryptoUtils, "sign").mockResolvedValue("signature");
 
       const jwt = `${encodedHeader}.${encodedPayload}.${invalidSignature}`;
 
-      expect(() => decode_jwt(secret, jwt)).toThrow("Invalid JWT signature");
+      await expect(decode_jwt(secret, jwt)).rejects.toThrow("Invalid JWT signature");
     });
   });
 
   describe("validate_jwt", () => {
-    it("Validate correct JWT", () => {
+    it("Validate correct JWT", async () => {
       const encodedHeader = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
         "base64"
       );
@@ -101,16 +101,16 @@ describe("JWT Library", () => {
       jest
         .spyOn(cryptoUtils, "base64UrlDecode")
         .mockImplementation((input) => Buffer.from(input, "base64").toString("utf-8"));
-      jest.spyOn(cryptoUtils, "sign").mockImplementation(() => "signature");
+      jest.spyOn(cryptoUtils, "sign").mockResolvedValue("signature");
 
       const jwt = `${encodedHeader}.${encodedPayload}.${signature}`;
 
-      const isValid = validate_jwt(secret, jwt);
+      const isValid = await validate_jwt(secret, jwt);
 
       expect(isValid).toBe(true);
     });
 
-    it("Check expired JWT", () => {
+    it("Check expired JWT", async () => {
       const encodedHeader = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
         "base64"
       );
@@ -126,19 +126,19 @@ describe("JWT Library", () => {
       jest
         .spyOn(cryptoUtils, "base64UrlDecode")
         .mockImplementation((input) => Buffer.from(input, "base64").toString("utf-8"));
-      jest.spyOn(cryptoUtils, "sign").mockImplementation(() => "signature");
+      jest.spyOn(cryptoUtils, "sign").mockResolvedValue("signature");
 
       const jwt = `${encodedHeader}.${encodedPayload}.${signature}`;
 
-      const isValid = validate_jwt(secret, jwt);
+      const isValid = await validate_jwt(secret, jwt);
 
       expect(isValid).toBe(false);
     });
 
-    it("Check invalid JWT", () => {
+    it("Check invalid JWT", async () => {
       const invalidJWT = "invalid.jwt.token";
 
-      const isValid = validate_jwt(secret, invalidJWT);
+      const isValid = await validate_jwt(secret, invalidJWT);
 
       expect(isValid).toBe(false);
     });

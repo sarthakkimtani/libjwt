@@ -1,9 +1,9 @@
 {
   "name": "@sarthakkimtani/libjwt",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "main": "dist/index.js",
-  "types": "global.d.ts",
-  "files": ["dist", "global.d.ts"],
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "npx tsc",
     "pretest": "npm run build",

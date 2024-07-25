@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 export function base64UrlEncode(input: string): string {
   return Buffer.from(input)
     .toString("base64")
@@ -21,12 +19,21 @@ export function base64UrlDecode(input: string): string {
   return Buffer.from(input, "base64").toString();
 }
 
-export function sign(input: string, secret: string): string {
-  return crypto
-    .createHmac("sha256", secret)
-    .update(input)
-    .digest("base64")
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+export async function sign(input: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const keyData = encoder.encode(secret);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign("HMAC", key, data);
+
+  const base64String = Buffer.from(signature).toString("base64");
+  return base64String.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }

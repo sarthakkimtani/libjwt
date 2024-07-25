@@ -1,6 +1,11 @@
 import { base64UrlEncode, base64UrlDecode, sign } from "./utils/crypto";
+import { JWTPayload, DecodedJWT } from "./types";
 
-export function encode_jwt(secret: string, payload: JWTPayload, ttl: number = 900): string {
+export async function encode_jwt(
+  secret: string,
+  payload: JWTPayload,
+  ttl: number = 900
+): Promise<string> {
   const header = { alg: "HS256", typ: "JWT" };
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + ttl;
@@ -9,12 +14,12 @@ export function encode_jwt(secret: string, payload: JWTPayload, ttl: number = 90
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
 
-  const signature = sign(`${encodedHeader}.${encodedPayload}`, secret);
+  const signature = await sign(`${encodedHeader}.${encodedPayload}`, secret);
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
 
-export function decode_jwt(secret: string, jwt: string): DecodedJWT {
+export async function decode_jwt(secret: string, jwt: string): Promise<DecodedJWT> {
   const parts = jwt.split(".");
   if (parts.length !== 3) {
     throw new Error("Invalid JWT format");
@@ -34,7 +39,7 @@ export function decode_jwt(secret: string, jwt: string): DecodedJWT {
     throw new Error("Unsupported JWT algorithm");
   }
 
-  const expectedSignature = sign(`${encodedHeader}.${encodedPayload}`, secret);
+  const expectedSignature = await sign(`${encodedHeader}.${encodedPayload}`, secret);
   if (expectedSignature !== signature) {
     throw new Error("Invalid JWT signature");
   }
@@ -47,9 +52,9 @@ export function decode_jwt(secret: string, jwt: string): DecodedJWT {
   };
 }
 
-export function validate_jwt(secret: string, jwt: string): boolean {
+export async function validate_jwt(secret: string, jwt: string): Promise<boolean> {
   try {
-    const decoded = decode_jwt(secret, jwt);
+    const decoded = await decode_jwt(secret, jwt);
     if (!decoded.expires_at || decoded.expires_at.getTime() < Date.now()) {
       return false;
     }
